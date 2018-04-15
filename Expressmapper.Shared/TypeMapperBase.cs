@@ -200,9 +200,31 @@ namespace ExpressMapper
 
         protected void AutoMapProperty(MemberInfo propertyGet, MemberInfo propertySet)
         {
+#if Profile344
+            MemberExpression callSetPropMethod = null;
+            if (propertySet is FieldInfo fieldPropertySet)
+            {
+                callSetPropMethod = Expression.Field(DestFakeParameter, fieldPropertySet);
+            }
+            else if (propertySet is PropertyInfo propertyPropertySet)
+            {
+                callSetPropMethod = Expression.Property(DestFakeParameter, propertyPropertySet);
+            }
+
+            MemberExpression callGetPropMethod = null;
+            if (propertyGet is FieldInfo fieldPropertyGet)
+            {
+                callGetPropMethod = Expression.Field(SourceParameter, fieldPropertyGet);
+            }
+            else if (propertyGet is PropertyInfo propertyPropertyGet)
+            {
+                callGetPropMethod = Expression.Property(SourceParameter, propertyPropertyGet);
+            }
+#else
             var callSetPropMethod = propertySet.MemberType == MemberTypes.Field ? Expression.Field(DestFakeParameter, propertySet as FieldInfo) : Expression.Property(DestFakeParameter, propertySet as PropertyInfo);
             var callGetPropMethod = propertyGet.MemberType == MemberTypes.Field ? Expression.Field(SourceParameter, propertyGet as FieldInfo) : Expression.Property(SourceParameter, propertyGet as PropertyInfo);
-
+#endif
+            
             MapMember(callSetPropMethod, callGetPropMethod);
         }
 
